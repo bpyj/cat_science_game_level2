@@ -1,4 +1,4 @@
-/* VERSION: 2026-07-24 23:38 (+08:00) */
+/* VERSION: 2026-07-27 22:53 (+08:00) */
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -37,6 +37,13 @@ html, body {
   align-items: center;
   justify-content: center;
   background: linear-gradient(180deg, #bfe6ff 0%, #8fd3a0 60%, #5fae6f 100%);
+  /* Safety net: if content (title box + button) is ever taller than a
+     short landscape viewport, this lets it scroll into view instead of
+     being silently clipped by html/body's overflow:hidden. The
+     landscape media query below should make this unnecessary on most
+     devices, but this keeps things reachable even on unusually short
+     screens (e.g. with browser chrome eating extra height). */
+  overflow-y: auto;
 }
 
 .hidden {
@@ -361,4 +368,68 @@ html, body {
   min-height: 20px;
   font-weight: bold;
   font-size: 14px;
+}
+
+/* ---- Short/landscape viewports (e.g. phone rotated sideways) ----
+   The start/complete/game-over screens center a title box + button
+   vertically. On a short landscape viewport (~350-430px tall on most
+   phones) the full-size version of that content can be taller than
+   the screen, pushing the Play button below the visible area even
+   though .screen's overflow-y:auto makes it technically reachable by
+   scroll - not obvious on a kids' game with no visible scrollbar. This
+   compacts everything so it fits without scrolling on typical devices. */
+@media (max-height: 500px) {
+  .title-box {
+    padding: 8px 16px 10px;
+    margin-bottom: 10px;
+    border-radius: 16px;
+  }
+
+  .title-emoji {
+    font-size: 34px;
+    margin-bottom: 4px;
+  }
+
+  .title-portrait {
+    margin-bottom: 2px;
+  }
+
+  .title-portrait img {
+    width: 52px;
+    height: 52px;
+  }
+
+  .title-emoji-fallback {
+    font-size: 34px;
+  }
+
+  .title-box h1 {
+    font-size: 18px;
+    margin: 0 0 4px 0;
+  }
+
+  .subtitle {
+    font-size: 12px;
+    line-height: 1.3;
+  }
+
+  .friend-strip {
+    margin-top: 8px;
+    gap: 8px;
+  }
+
+  .friend-thumb {
+    width: 32px;
+    height: 32px;
+  }
+
+  .big-btn {
+    font-size: 17px;
+    padding: 10px 30px;
+  }
+
+  .big-btn.small {
+    font-size: 14px;
+    padding: 8px 22px;
+  }
 }

@@ -1,4 +1,4 @@
-// VERSION: 2026-07-25 00:58 (+08:00)
+// VERSION: 2026-07-27 22:53 (+08:00)
 // Sunny's Biodiversity Trail - Level 2 - script.js
 // Written in ES5 only (var, function expressions, no arrow functions,
 // no let/const, no template literals, no classes) for Mimo compatibility.
@@ -218,6 +218,12 @@
   var CANVAS_H = window.innerHeight;
   var GROUND_RATIO = 0.80;
   var GROUND_Y = Math.round(CANVAS_H * GROUND_RATIO);
+  // Fraction of the way down the *background image itself* (not the
+  // canvas) where its drawn dirt path sits, measured from the actual
+  // art. Used by drawBackground() to keep the visible path lined up
+  // with GROUND_Y in every orientation. Update this if the background
+  // image is ever swapped for art with the path in a different spot.
+  var BACKGROUND_PATH_FRAC = 0.76;
   var LEVEL_WIDTH = Math.max(Math.round(CANVAS_W * 3.0), 1300);
 
   var BASE_CAT_SIZE = 64;
@@ -350,6 +356,14 @@
       // objects like cards/garden), fraction of the sprite's own
       // height for ones that should visually float up once solved.
       raiseAfterFrac: 0.7,
+      // The sourced bird-lost.png art has a visible gap between the
+      // bird and the bottom edge of its own image (measured from an
+      // in-game screenshot: the bird's feet sat ~40% of its own
+      // sprite height above the road). This nudges the "before" sprite
+      // down by that much to compensate, without moving the actual
+      // hitbox used for triggering. Only applies pre-solve; the
+      // raised "after" nest doesn't need it (deliberately floating).
+      groundOffsetFrac: 0.35,
       placeholderEmoji: "\uD83D\uDC26",
       color: "#8fd3a0",
       taskId: "birdHabitat",
@@ -997,14 +1011,44 @@
       var img = images.background;
       var iw = img.naturalWidth || 1920;
       var ih = img.naturalHeight || 1080;
-      var scale = CANVAS_H / ih;
+
+      // "Cover" scaling: pick whichever scale (height-based or
+      // width-based) is larger, so the image always fully covers the
+      // canvas in both dimensions. Height-only scaling (the old
+      // approach) left a gap on wide landscape screens - where the
+      // canvas is proportionally wider than the background's 16:9
+      // aspect ratio - because the height-scaled image ended up
+      // narrower than the screen. In portrait this produces the exact
+      // same result as before (height-based scale is always the
+      // larger one there), so nothing changes for the common case.
+      var scale = Math.max(CANVAS_H / ih, CANVAS_W / iw);
       var dw = iw * scale;
-      var dh = CANVAS_H;
+      var dh = ih * scale;
+
       var maxCamX = Math.max(0, LEVEL_WIDTH - CANVAS_W);
       var panRange = Math.max(0, dw - CANVAS_W);
       var t = maxCamX > 0 ? (camera.x / maxCamX) : 0;
       var dx = -(t * panRange);
-      ctx.drawImage(img, dx, 0, dw, dh);
+
+      // Vertical placement: portrait mode has no room to shift the
+      // image at all (dh === CANVAS_H, zero slack), so it's always
+      // top-aligned - which naturally puts the path's top edge at
+      // BACKGROUND_PATH_FRAC (76%) of the screen while Newton stands
+      // at GROUND_RATIO (80%). That gap is what makes him look
+      // planted solidly inside the path rather than right on its
+      // edge. Landscape *does* have slack to shift within, so instead
+      // of using that slack to snap the path's top edge exactly to
+      // the ground line (which put characters right at the path's
+      // edge - technically aligned, but a different look than
+      // portrait), this targets the same fixed screen position
+      // portrait always lands on (BACKGROUND_PATH_FRAC * CANVAS_H),
+      // so both orientations look consistent instead of landscape
+      // reading as "edge" and portrait as "inset".
+      var idealDy = BACKGROUND_PATH_FRAC * (CANVAS_H - dh);
+      var minDy = -(dh - CANVAS_H);
+      var dy = Math.max(minDy, Math.min(0, idealDy));
+
+      ctx.drawImage(img, dx, dy, dw, dh);
     }
   }
 
@@ -1054,12 +1098,17 @@
       var p = points[i];
       var key = p.completed ? p.imgKeyAfter : p.imgKeyBefore;
       // Hitbox (p.x/p.y) stays at ground level always, so Newton can
-      // still walk up to trigger/replay it - this offset only affects
-      // where the "solved" art is drawn (e.g. a nest perched on a
-      // branch instead of sitting flat on the forest floor).
+      // still walk up to trigger/replay it. These two offsets only
+      // affect where the art is drawn, never the hitbox:
+      // - raiseAfterFrac lifts the "solved" sprite up (e.g. a nest
+      //   perched on a branch instead of sitting flat on the ground).
+      // - groundOffsetFrac nudges the "unsolved" sprite down, to
+      //   compensate for transparent padding baked into some sourced
+      //   art that otherwise leaves a visible gap above the ground.
       var raiseFrac = (p.completed && p.raiseAfterFrac) ? p.raiseAfterFrac : 0;
+      var groundOffsetFrac = (!p.completed && p.groundOffsetFrac) ? p.groundOffsetFrac : 0;
       var drawX = p.x;
-      var drawY = p.y - Math.round(p.h * raiseFrac);
+      var drawY = p.y - Math.round(p.h * raiseFrac) + Math.round(p.h * groundOffsetFrac);
       drawImageOrPlaceholder(key, drawX, drawY, p.w, p.h, function () {
         ctx.fillStyle = p.color;
         ctx.globalAlpha = p.completed ? 0.55 : 1;
