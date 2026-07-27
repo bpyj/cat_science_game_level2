@@ -1,0 +1,121 @@
+<!-- VERSION: 2026-07-24 23:38 (+08:00) -->
+<!-- VERSION: 2026-07-24 15:11 (+00:00) -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Sunny's Biodiversity Trail</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="game-container">
+
+  <!-- START SCREEN -->
+  <div id="start-screen" class="screen">
+    <img class="start-bg-img" src="https://i.postimg.cc/vmNgDWR3/forest-background-2.png" alt=""
+         onerror="this.style.display='none';">
+    <div class="title-box">
+      <div class="title-portrait">
+        <img src="https://i.postimg.cc/t4Rmv7tC/friend-cat-1.png" alt="Sunny"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <span class="title-emoji-fallback">🌿🐱</span>
+      </div>
+      <h1>Sunny's Biodiversity Trail</h1>
+      <p class="subtitle">Sunny needs help exploring nature.<br>Find living things, help a lost bird, sort the food chain, and spot the pollinators!</p>
+      <div class="friend-strip">
+        <img class="friend-thumb" src="https://i.postimg.cc/t4Rmv7tC/friend-cat-1.png" alt="Sunny"
+             onerror="this.style.display='none';">
+      </div>
+    </div>
+    <button id="play-btn" class="big-btn pulse">▶ PLAY</button>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="game-screen" class="screen hidden">
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Top HUD -->
+    <div id="hud">
+      <div id="progress-display">Nature Discoveries: <span id="progress-count">0</span>/3</div>
+      <div id="hud-buttons">
+        <button id="sound-btn" class="icon-btn">🔊</button>
+        <button id="restart-btn" class="icon-btn">🔄</button>
+      </div>
+    </div>
+
+    <!-- Touch controls -->
+    <div id="controls">
+      <div id="move-controls">
+        <button id="left-btn" class="ctrl-btn">◀</button>
+        <button id="right-btn" class="ctrl-btn">▶</button>
+      </div>
+      <button id="jump-btn" class="ctrl-btn jump">⬆</button>
+    </div>
+
+    <!-- Restart confirm overlay -->
+    <div id="restart-overlay" class="overlay hidden">
+      <div class="overlay-box">
+        <h2>Restart level?</h2>
+        <p class="subtitle">Your discoveries and progress will reset.</p>
+        <button id="confirm-restart-btn" class="big-btn small">Restart</button>
+        <button id="cancel-restart-btn" class="big-btn small secondary">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Intro speech bubble - shown when Newton first reaches Sunny or
+         a nature question point, before the puzzle opens -->
+    <div id="friend-intro-overlay" class="overlay hidden">
+      <div class="overlay-box speech-bubble">
+        <h2 id="friend-intro-name">Friend</h2>
+        <p id="friend-intro-message">Hi!</p>
+        <button id="friend-intro-yes-btn" class="big-btn small">Yes!</button>
+        <button id="friend-intro-no-btn" class="big-btn small secondary">No</button>
+      </div>
+    </div>
+
+    <!-- Simple one-button message overlay (decline messages, "too early" badge message) -->
+    <div id="info-overlay" class="overlay hidden">
+      <div class="overlay-box speech-bubble">
+        <h2 id="info-name">Newton</h2>
+        <p id="info-message">Message</p>
+        <button id="info-ok-btn" class="big-btn small">OK</button>
+      </div>
+    </div>
+
+    <!-- Puzzle overlay -->
+    <div id="puzzle-overlay" class="overlay hidden">
+      <div class="overlay-box puzzle-box">
+        <h2 id="puzzle-title">Task</h2>
+        <p id="puzzle-instructions">Instructions go here</p>
+        <div id="puzzle-options"></div>
+        <div id="puzzle-feedback"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEVEL COMPLETE SCREEN -->
+  <div id="complete-screen" class="screen hidden">
+    <div class="title-box">
+      <div class="title-emoji">🏅🌿</div>
+      <h1>Nature Explorer Badge!</h1>
+      <p class="subtitle">Plants, animals and fungi all share nature.<br>Living things need suitable habitats and can depend on one another.</p>
+    </div>
+    <button id="play-again-btn" class="big-btn">Play Again</button>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="gameover-screen" class="screen hidden">
+    <div class="title-box">
+      <div class="title-emoji">😿</div>
+      <h1>Oh no!</h1>
+      <p class="subtitle">The cat needs another try.</p>
+    </div>
+    <button id="try-again-btn" class="big-btn">Try Again</button>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
